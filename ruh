@@ -1,0 +1,68 @@
+#!/bin/bash
+
+# --- Dynamic Configuration ---
+# Detect the repository name (e.g., "ui"). Defaults to 'ui' if not found.
+REPO_NAME=${RepositoryName:-"ui"}
+
+# Settings for the primary container
+DEFAULT_NAME="firefox"
+DEFAULT_PORT="5800"
+DEFAULT_CONFIG_PATH="/workspaces/${REPO_NAME}/fox"
+
+# Settings for the fallback (second) container
+FALLBACK_NAME="firefox01"
+FALLBACK_PORT="5801"
+FALLBACK_CONFIG_PATH="/workspaces/${REPO_NAME}/fox2"
+
+# --- Interactive User Prompt ---
+read -p "Do you want to start the primary '${DEFAULT_NAME}' container? (y/n): " -n 1 -r
+echo 
+
+# --- Script Logic ---
+if [[ $REPLY =~ ^[Yy]$ ]]; then
+    echo "You chose to start the primary container: '${DEFAULT_NAME}'"
+    CONTAINER_TO_CREATE_NAME=$DEFAULT_NAME
+    PORT_TO_USE=$DEFAULT_PORT
+    CONFIG_PATH_TO_USE=$DEFAULT_CONFIG_PATH
+
+    if docker ps -a --format '{{.Names}}' | grep -q -w "^${DEFAULT_NAME}$"; then
+        echo "Error: Container '${DEFAULT_NAME}' already exists."
+        exit 1
+    fi
+
+elif [[ $REPLY =~ ^[Nn]$ ]]; then
+    echo "You chose to start the secondary container: '${FALLBACK_NAME}'"
+    CONTAINER_TO_CREATE_NAME=$FALLBACK_NAME
+    PORT_TO_USE=$FALLBACK_PORT
+    CONFIG_PATH_TO_USE=$FALLBACK_CONFIG_PATH
+
+    if docker ps -a --format '{{.Names}}' | grep -q -w "^${FALLBACK_NAME}$"; then
+        echo "Error: Container '${FALLBACK_NAME}' already exists."
+        exit 1
+    fi
+else
+    echo "Invalid choice."
+    exit 1
+fi
+
+echo "---"
+echo "Detected Repo Path: /workspaces/${REPO_NAME}"
+echo "Config Path:        ${CONFIG_PATH_TO_USE}"
+echo "---"
+
+# Create the host directory
+mkdir -p "${CONFIG_PATH_TO_USE}"
+
+# Run the docker container
+docker run -d \
+    --name=${CONTAINER_TO_CREATE_NAME} \
+    -p ${PORT_TO_USE}:5800 \
+    -v ${CONFIG_PATH_TO_USE}:/config:rw \
+    -e DARK_MODE=1 \
+    -e WEB_AUDIO=1 \
+    -e SECURE_CONNECTION=0 \
+    -e ENABLE_CJK_FONT=1 \
+    jlesage/firefox
+
+echo "---"
+echo "Successfully launched container '${CONTAINER_TO_CREATE_NAME}'."
