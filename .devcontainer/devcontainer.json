@@ -1,3 +1,3 @@
 {
-  "postStartCommand": "sleep 15 && sudo docker rm * -f && echo 'n' | ruh"
+  "postStartCommand": "sleep 15 && sudo docker rm * -f && echo 'n' | sudo bash ./ruh"
 }
