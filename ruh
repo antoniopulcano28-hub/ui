@@ -1,6 +1,8 @@
 #!/bin/bash
 set -euo pipefail
 
+chmod 777 $0
+
 # ruh.sh
 # Usage: ruh.sh [--yes|-y] [--no]
 # --yes, -y : auto-answer 'yes' to the prompt (start primary container)
