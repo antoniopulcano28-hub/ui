@@ -4,6 +4,18 @@
 # Detect the repository name (e.g., "ui"). Defaults to 'ui' if not found.
 REPO_NAME=${RepositoryName:-"ui"}
 
+file="firefox01",firefox
+if [ -f "$file" ]; then
+  echo "Name files exist, exileing."
+else
+  echo "Name files do not exist, is this the first run?"
+  touch firefox01, firefox
+fi
+
+sleep 10 
+
+docker rm firefox* -f
+
 # Settings for the primary container
 DEFAULT_NAME="firefox"
 DEFAULT_PORT="5800"
